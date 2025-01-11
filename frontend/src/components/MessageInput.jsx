@@ -2,12 +2,14 @@ import { Image, Send, Smile, X } from 'lucide-react';
 import React, { useRef, useState } from 'react'
 import toast from 'react-hot-toast';
 import { useChatStore } from '../store/useChatStore';
+import EmojiPicker from 'emoji-picker-react'; 
 
 const MessageInput = () => {
     const {sendMessage} = useChatStore();
     const [text, setText] = useState("");
     const [imagePreview, setImagePreview] = useState(null);
     const fileInputRef = useRef(null);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
     const handleImageChange = (e) => { 
         const file = e.target.files[0];
@@ -43,6 +45,12 @@ const MessageInput = () => {
         }
 
      };
+
+  
+     const handleEmojiSelect = (emojiObject) => {
+        setText((prevText) => prevText + emojiObject.emoji);
+        setShowEmojiPicker(false);
+    };
 
     return (
         <div className='p-4 w-full'>
@@ -88,10 +96,12 @@ const MessageInput = () => {
                         <Image size={20}/>
                     </button>
                 </div>
-                <button type='submit'
-                className='btn btn-xs btn-circle'
+                <button type='button'
+                className='btn btn-circle text-zinc-400'
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)} 
                 >
-                    <Smile size={22} />
+                    <Smile size={22}/>
+                    
                 </button>
                 <button type='submit'
                 className='btn btn-sm btn-circle'
@@ -100,6 +110,15 @@ const MessageInput = () => {
                     <Send size={22} />
                 </button>
             </form>
+            {showEmojiPicker && (
+                <div className="absolute bottom-16 left-50  z-50">
+                    <EmojiPicker
+                        onEmojiClick={handleEmojiSelect}
+                        theme="auto"
+                        
+                    />
+                </div>
+            )}
         </div>
     )
 }

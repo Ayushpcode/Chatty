@@ -1,22 +1,38 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import AuthImagePattern from '../components/AuthImagePattern';
-import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Loader2, Lock, MessageSquare } from 'lucide-react';
 
-const LoginPage = () => {
+const ResetPassword = () => {
+  const { id, token } = useParams();
   const [showPassword, setShowPassword] = useState(false);
   const [formdata, setFormData] = useState({
-    email: "",
     password: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
 
-  const { login, isLoggingIn } = useAuthStore();
+  const { resetPassword } = useAuthStore();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    login(formdata);
+    if (!formdata.password) return;
+
+    setIsSubmitting(true);
+
+    const success = await resetPassword(id, token, formdata.password);
+    if (success) {
+      setResetSuccess(true);
+      setTimeout(() => {
+        navigate('/login'); // Redirect to login page after a successful password reset
+      }, 2000); // 2 seconds delay to show success state (you can adjust this)
+    } else {
+      setIsSubmitting(false);
+    }
   };
+
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
@@ -26,30 +42,12 @@ const LoginPage = () => {
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <MessageSquare className="w-6 h-6 text-primary" />
               </div>
-              <h1 className="text-2xl font-bold mt-2">Welcome Back</h1>
-              <p className="text-base-content/60">Sign in to your account</p>
+              <h1 className="text-2xl font-bold mt-2">Reset Password</h1>
+              <p className="text-base-content/60">Enter your new password below</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Email</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="w-5 h-5 text-base-content/40" />
-                </div>
-                <input
-                  type="email"
-                  className="input input-bordered w-full pl-10"
-                  placeholder="Enter your email"
-                  value={formdata.email}
-                  onChange={(e) => setFormData({ ...formdata, email: e.target.value })}
-                />
-              </div>
-            </div>
-
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium">Password</span>
@@ -61,7 +59,7 @@ const LoginPage = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   className="input input-bordered w-full pl-10"
-                  placeholder="Passcode"
+                  placeholder="New Password"
                   value={formdata.password}
                   onChange={(e) => setFormData({ ...formdata, password: e.target.value })}
                 />
@@ -79,32 +77,23 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <Link to="/forgot-password" className='text-right link link-error'>forgot password?</Link>
-
             <button
               type="submit"
-              className={`btn btn-primary w-full ${isLoggingIn ? 'cursor-not-allowed' : ''}`}
-              disabled={isLoggingIn}
+              className={`btn btn-primary w-full ${isSubmitting ? 'cursor-not-allowed' : ''}`}
+              disabled={isSubmitting}
             >
-              {isLoggingIn ? (
+              {isSubmitting ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
                   Loading...
                 </>
-              ) : (
-                "Sign in"
+              ) 
+              :
+               (
+                "Update Password"
               )}
             </button>
           </form>
-
-          <div className="text-center">
-            <p className="text-base-content/60">
-              Don&apos;t have an account?{" "}
-              <Link to="/sign-up" className="link link-primary">
-                Create account
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
       <AuthImagePattern
@@ -112,7 +101,7 @@ const LoginPage = () => {
         subtitle="Connect with friends, share moments, and stay in touch with your loved ones."
       />
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default ResetPassword;

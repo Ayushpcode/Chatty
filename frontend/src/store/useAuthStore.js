@@ -70,6 +70,50 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  forgotPassword: async (email) => {
+    set({ isLoggingIn: true });
+    try {
+      const res = await axiosInstance.post("/auth/forgot-password", { email });
+  
+      // Success
+      toast.success(res.data.message || "Password reset email sent!");
+    } catch (error) {
+      // Enhanced error handling and logging
+      const errorMessage = error.response?.data?.message || "Failed to send reset email.";
+  
+      // Display error message to the user
+      toast.error(errorMessage);
+  
+      // Log the full error for debugging
+      console.error("Forgot Password Error:", error);
+  
+      // Check for specific error codes
+      if (error.response?.status === 401) {
+        console.error("Unauthorized: Please check authentication or token.");
+      } else if (error.response?.status === 500) {
+        console.error("Server Error: There might be a backend issue.");
+      }
+    } finally {
+      set({ isLoggingIn: false }); // Hide loading state
+    }
+  },
+
+
+  resetPassword: async (id, token, newPassword) => {
+    try {
+      const res = await axiosInstance.post(`/auth/reset-password/${id}/${token}`, {
+        password: newPassword,
+      });
+      toast.success("Password reset successfully!");
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Failed to reset password.";
+      toast.error(errorMessage);
+      console.error("Reset Password Error:", error);
+    }
+  },
+  
+  
+
   logout: async () => {
     try {
       await axiosInstance.post("/auth/logout");

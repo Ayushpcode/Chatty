@@ -11,6 +11,8 @@ import { useThemeStore } from './store/useThemeStore'
 import { Loader} from "lucide-react"
 import { useEffect } from 'react'
 import {Toaster} from "react-hot-toast"
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 
 
 function App() {
@@ -42,6 +44,8 @@ function App() {
       <Route path="/login" element={ !authUser ?<LoginPage /> : <Navigate to="/"/>} />
       <Route path="/setting" element={<SettingPage />} />
       <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login"/>} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:id/:token" element={<ResetPassword />} />
     </Routes>
 
     <Toaster />
